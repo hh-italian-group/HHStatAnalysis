@@ -14,6 +14,7 @@ struct Arguments {
     run::Argument<std::string> model_desc{"model-desc", "name of the stat model descriptor in the config"};
     run::Argument<std::string> shapes{"shapes", "file with input shapes"};
     run::Argument<std::string> output_path{"output", "path where to store created datacards"};
+    run::Argument<std::string> signal_point{"signal-point", "run on a single signal point", ""};
 };
 
 } // anonymous namespace
@@ -27,7 +28,11 @@ public:
     void Run()
     {
         static const std::string creator_fn_name = "create_stat_model";
-        const StatModelDescriptor model_desc = LoadDescriptor(args.cfg(), args.model_desc());
+        StatModelDescriptor model_desc = LoadDescriptor(args.cfg(), args.model_desc());
+        if(args.signal_point().size()) {
+            model_desc.signal_points.clear();
+            model_desc.signal_points.push_back(args.signal_point());
+        }
         const auto stat_model_ref = SplitValueList(model_desc.stat_model, true, "/");
         if(stat_model_ref.size() != 2)
             throw exception("Bad stat model name '%1%'") % model_desc.stat_model;

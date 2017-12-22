@@ -3,6 +3,8 @@ This file is part of https://github.com/cms-hh/HHStatAnalysis. */
 
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <TFile.h>
 #include <TTree.h>
 #include <TH2.h>
@@ -31,6 +33,16 @@ size_t GetQuantileId(double quantile)
     }
     throw exception("Unknown quantile = %1%") % quantile;
 }
+
+size_t GetQuantileId(const std::string& quantile_name)
+{
+    for(size_t n = 0; n < all_limit_quantile_names.size(); ++n) {
+        if(all_limit_quantile_names[n] == quantile_name)
+            return n;
+    }
+    throw exception("Unknown quantile = '%1%'.") % quantile_name;
+}
+
 
 double GetHiggsMass(const std::string& file_name)
 {
@@ -445,6 +457,7 @@ struct Arguments : run::ArgumentsBase {
     Arg<Range<double>> range_x{ "range-x", "x range in format min:max" };
     Arg<Range<double>> range_y{ "range-y", "y range in format min:max" };
     Arg<Units> units{ "units", "units in which limits are given", Units::pb };
+    Arg<bool> json{ "json", "input is a json file with limits", false};
 };
 
 class SimpleHHInterpret {
@@ -492,6 +505,8 @@ public:
 private:
     InterpolatorVec ReadInterpolatedLimits(const std::string& input_dir_name, Range& mass_range, Units units)
     {
+        if(args.json()) return ReadInterpolatedLimitsFromJson(input_dir_name, mass_range, units);
+
         const auto& file_names = GetOrderedFileList(input_dir_name, ".*\\.root");
         std::vector<std::vector<double>> limits(all_limit_quantiles.size());
         std::set<double> masses;
@@ -525,6 +540,42 @@ private:
         mass_range = Range(mass_vec.front(), mass_vec.back());
         InterpolatorVec interps;
         for(size_t n = 0; n < limits.size(); ++n) {
+            if(limits[n].size() != masses.size())
+                throw exception("Inconsistent input limits.");
+            InterpolatorPtr interp(new ROOT::Math::Interpolator(mass_vec, limits[n], ROOT::Math::Interpolation::kCSPLINE));
+            interps.push_back(interp);
+        }
+        return interps;
+    }
+
+    InterpolatorVec ReadInterpolatedLimitsFromJson(const std::string& limit_file, Range& mass_range, Units units)
+    {
+        boost::property_tree::ptree property_tree;
+        boost::property_tree::json_parser::read_json(limit_file, property_tree);
+
+        std::vector<std::vector<double>> limits(all_limit_quantiles.size());
+        std::set<double> masses;
+        const double units_factor = GetUnitsFactor(units);
+
+        for(const auto& entry : property_tree) {
+            const double mass = std::stod(entry.first);
+            std::cout << "Adding " << mass << std::endl;
+            if(masses.count(mass))
+                throw exception("More than one file with for the mass point = %1%") % mass;
+            masses.insert(mass);
+            for(const auto& limit_entry : entry.second) {
+                const size_t quantile_id = GetQuantileId(limit_entry.first);
+                const double limit = limit_entry.second.get_value<double>();
+                limits.at(quantile_id).push_back(limit * units_factor);
+            }
+        }
+
+        const std::vector<double> mass_vec(masses.begin(), masses.end());
+        mass_range = Range(mass_vec.front(), mass_vec.back());
+        InterpolatorVec interps;
+        for(size_t n = 0; n < limits.size(); ++n) {
+            if(!limits[n].size())
+                limits[n] = limits[GetQuantileId("exp0")];
             if(limits[n].size() != masses.size())
                 throw exception("Inconsistent input limits.");
             InterpolatorPtr interp(new ROOT::Math::Interpolator(mass_vec, limits[n], ROOT::Math::Interpolation::kCSPLINE));

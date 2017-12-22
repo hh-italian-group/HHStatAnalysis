@@ -129,7 +129,7 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     const Uncertainty qcd_sf_unc("qcd_sf_unc", CorrelationRange::Channel, UncDistributionType::lnN);
     for(const auto& sf_entry : qcd_os_ss_sf) {
         const double rel_stat_unc = std::get<1>(sf_entry.second) / std::get<0>(sf_entry.second);
-        double rel_ext_unc = 0;
+        double rel_ext_unc = 0.2;
 //        if(std::abs(std::get<2>(sf_entry.second) - std::get<0>(sf_entry.second)) >
 //                std::get<1>(sf_entry.second) + std::get<3>(sf_entry.second))
 //            rel_ext_unc = std::get<2>(sf_entry.second) / std::get<0>(sf_entry.second) - 1;

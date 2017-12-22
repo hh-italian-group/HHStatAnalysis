@@ -25,6 +25,8 @@ parser.add_argument('--impacts', action="store_true",
                     help="Compute impact of each nuissance parameter to the final result.")
 parser.add_argument('--pulls', action="store_true", help="Compute pulls.")
 parser.add_argument('--GoF', action="store_true", help="Evaluate goodness of fit.")
+parser.add_argument('--signal-point', required=False, dest='signal_point', type=str, default="", metavar='M',
+                    help="run on a single signal point")
 parser.add_argument('shapes_file', type=str, nargs='+', help="file with input shapes")
 
 args = parser.parse_args()
@@ -49,10 +51,11 @@ if run_limits:
         for file in args.shapes_file:
             hadd_command += ' "{}"'.format(file)
         sh_call(hadd_command, "error while executing hadd for input files")
-
-    sh_call('create_hh_datacards --cfg {} --model-desc {} --shapes {} --output {}'
-            .format(args.cfg, args.model_desc, shapes_file, args.output_path),
-            "error while executing create_hh_datacards")
+    create_cmd = 'create_hh_datacards --cfg {} --model-desc {} --shapes {} --output {}' \
+                 .format(args.cfg, args.model_desc, shapes_file, args.output_path)
+    if len(args.signal_point) > 0:
+        create_cmd += ' --signal-point {}'.format(args.signal_point)
+    sh_call(create_cmd, "error while executing create_hh_datacards")
 
 limit_type = str(model_desc.limit_type)
 if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
@@ -149,6 +152,8 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
                              ' --allPars --parallel {}'.format(point, args.n_parallel)
                 if model_desc.blind:
                     impact_cmd += ' -t -1'
+                else:
+                    impact_cmd += '--rMax 1000'
 
                 sh_call(impact_cmd + ' --doInitialFit', "error while doing initial fit for impacts")
                 sh_call(impact_cmd + ' --robustFit 1 --doFits', "error while doing robust fit for impacts")
@@ -210,7 +215,7 @@ elif limit_type == 'MSSM':
         ch_dir(work_path)
 
         if collect_limits:
-            asymptoticGrid_cmd = 'combineTool.py -M AsymptoticGrid ../../{} -d ../{} --parallel {}'.format(
+            asymptoticGrid_cmd = 'combineTool.py -M AsymptoticGrid ../../{} -d ../{} --parallel {} --minimizerStrategy=1'.format(
                                  grid_file_name, workspace_file, args.n_parallel)
             if model_desc.blind:
                 asymptoticGrid_cmd += ' -t -1'
