@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import argparse
 import json
@@ -9,17 +11,20 @@ args = parser.parse_args()
 
 points = list(filter(lambda f: os.path.isdir('{}/{}'.format(args.input, f)), os.listdir(args.input)))
 
-#print(os.listdir(args.input))
-#print(points)
+print(os.listdir(args.input))
+print(points)
 cmb_results = {}
 
-for point in points:
-    print(point)
-    point_file_name = '{}/{}/limits_cmb.json'.format(args.input, point)
-    with open(point_file_name, 'r')  as point_file:
-        point_results = json.load(point_file)
-        cmb_results.update(point_results)
+limit_points = ['cmb', 'eTau', 'muTau', 'tauTau', 'res1b', 'res2b', 'boosted']
 
-output_name = '{}/limits_cmb.json'.format(args.input)
-with open(output_name, 'w') as out_file:
-    out_file.write(json.dumps(cmb_results, sort_keys=True, indent=4, separators=(',', ': ')))
+for limit in limit_points:
+    for point in points:
+        print(point)
+        point_file_name = '{}/{}/limits_{}.json'.format(args.input, point, limit)
+        with open(point_file_name, 'r')  as point_file:
+            point_results = json.load(point_file)
+            cmb_results.update(point_results)
+
+    output_name = '{}/limits_{}.json'.format(args.input, limit)
+    with open(output_name, 'w') as out_file:
+        out_file.write(json.dumps(cmb_results, sort_keys=True, indent=4, separators=(',', ': ')))
