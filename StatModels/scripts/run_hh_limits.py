@@ -64,7 +64,7 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
         sh_call('combineTool.py -M T2W -i */* -o workspace.root --parallel {}'.format(args.n_parallel),
                 "error while executing text to workspace")
         combine_cmd = 'combineTool.py -M Asymptotic -d */*/workspace.root --there -n .limit --parallel {}' \
-                      .format(args.n_parallel)
+                      ' --minimizerStrategy=1'.format(args.n_parallel)
         if model_desc.blind:
             combine_cmd += ' --run blind'
         sh_call(combine_cmd, "error while executing combine")

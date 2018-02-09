@@ -26,8 +26,8 @@ std::string ShapeNameRule::NumToName(double x)
     std::ostringstream ss;
     ss << x;
     std::string str = ss.str();
-    std::replace(str.begin(), str.end(), '-', 'm');
-    std::replace(str.begin(), str.end(), '.', 'p');
+    // std::replace(str.begin(), str.end(), '-', 'm');
+    // std::replace(str.begin(), str.end(), '.', 'p');
     return str;
 }
 
