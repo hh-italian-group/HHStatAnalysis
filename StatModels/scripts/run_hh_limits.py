@@ -115,7 +115,7 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
             ch_dir(gof_work_path)
 
             gof_algo = 'saturated'
-            n_toys = 1000
+            n_toys = 1100
             n_toys_per_job = n_toys / args.n_parallel
 
             gof_out = '../../../GoF_{}_{}'.format(channel, gof_algo)
@@ -123,8 +123,6 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
 
             gof_cmd = 'combineTool.py -M GoodnessOfFit --algorithm {} -d ../workspace.root --fixedSignalStrength=0' \
                       .format(gof_algo)
-            if limit_type == 'SM':
-                combine_cmd += ' --rMax 100'
 
             sh_call('{} -n .{}'.format(gof_cmd, gof_algo), "error while evaluating goodness of fit for data")
             sh_call('{} -n .{}.toys -t {} -s 0:{}:1 --parallel {}' \
@@ -137,7 +135,8 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
                     "error while collecting toys for goodness of fit")
 
             plotGoF = os.environ['CMSSW_BASE'] + '/src/CombineHarvester/CombineTools/scripts/plotGof.py'
-            sh_call('{} --statistic {} --mass 120.0 {} -o {}'.format(plotGoF, gof_algo, gof_json_out, gof_out),
+            sh_call('{} --statistic {} --mass 120.0 {} -o {} --x-min 0 --x-max 250' \
+                    .format(plotGoF, gof_algo, gof_json_out, gof_out),
                     "error while plotting goodness of fit")
 
             ch_dir('../../..')
