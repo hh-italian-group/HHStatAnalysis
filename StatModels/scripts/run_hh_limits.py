@@ -69,6 +69,8 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
             combine_cmd += ' --run blind'
         if limit_type == 'SM':
             combine_cmd += ' --rMax 100'
+        else:
+            combine_cmd += ' --rMax 1'
         sh_call(combine_cmd, "error while executing combine")
 
     if collect_limits:
@@ -156,7 +158,10 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
                 if model_desc.blind:
                     impact_cmd += ' -t -1 --rMax 100'
                 else:
-                    impact_cmd += '--rMax 100'
+                    if limit_type == 'SM':
+                        impact_cmd += ' --rMax 100'
+                    else:
+                        impact_cmd += ' --rMax 1'
 
                 sh_call(impact_cmd + ' --doInitialFit', "error while doing initial fit for impacts")
                 sh_call(impact_cmd + ' --robustFit 1 --doFits', "error while doing robust fit for impacts")
