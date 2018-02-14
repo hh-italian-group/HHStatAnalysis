@@ -67,6 +67,8 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
                       ' --minimizerStrategy=1'.format(args.n_parallel)
         if model_desc.blind:
             combine_cmd += ' --run blind'
+        if limit_type == 'SM':
+            combine_cmd += ' --rMax 100'
         sh_call(combine_cmd, "error while executing combine")
 
     if collect_limits:
@@ -113,7 +115,7 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
             ch_dir(gof_work_path)
 
             gof_algo = 'saturated'
-            n_toys = 800
+            n_toys = 1000
             n_toys_per_job = n_toys / args.n_parallel
 
             gof_out = '../../../GoF_{}_{}'.format(channel, gof_algo)
@@ -121,6 +123,8 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
 
             gof_cmd = 'combineTool.py -M GoodnessOfFit --algorithm {} -d ../workspace.root --fixedSignalStrength=0' \
                       .format(gof_algo)
+            if limit_type == 'SM':
+                combine_cmd += ' --rMax 100'
 
             sh_call('{} -n .{}'.format(gof_cmd, gof_algo), "error while evaluating goodness of fit for data")
             sh_call('{} -n .{}.toys -t {} -s 0:{}:1 --parallel {}' \
@@ -148,12 +152,12 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
                 if not os.path.exists(impacts_work_path):
                     os.makedirs(impacts_work_path)
                 ch_dir(impacts_work_path)
-                impact_cmd = 'combineTool.py -M Impacts -m {} -d ../workspace.root --expectSignal 1' \
+                impact_cmd = 'combineTool.py -M Impacts -m {} -d ../workspace.root --expectSignal 10' \
                              ' --allPars --parallel {}'.format(point, args.n_parallel)
                 if model_desc.blind:
-                    impact_cmd += ' -t -1'
+                    impact_cmd += ' -t -1 --rMax 100'
                 else:
-                    impact_cmd += '--rMax 1000'
+                    impact_cmd += '--rMax 100'
 
                 sh_call(impact_cmd + ' --doInitialFit', "error while doing initial fit for impacts")
                 sh_call(impact_cmd + ' --robustFit 1 --doFits', "error while doing robust fit for impacts")
