@@ -23,17 +23,7 @@ void ttbb_nonresonant::CreateDatacards(const std::string& output_path)
 
     ch::CombineHarvester harvester;
 
-    // desc.signal_points.clear();
-    // for(double x : desc.grid_x)
-    //     desc.signal_points.push_back(analysis::ToString(x));
-
-    for(const auto& channel : desc.channels) {
-        const auto& ch_categories = GetChannelCategories(channel);
-        harvester.AddObservations(wildcard, ana_name, eras, {channel}, ch_categories);
-        harvester.AddProcesses(desc.signal_points, ana_name, eras, {channel}, signal_processes, ch_categories, true);
-        harvester.AddProcesses(wildcard, ana_name, eras, {channel}, bkg_all, ch_categories, false);
-    }
-
+    AddProcesses(harvester);
     AddSystematics(harvester);
     ExtractShapes(harvester);
 

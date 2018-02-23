@@ -37,12 +37,43 @@ const StatModel::v_str ttbb_base::bkg_VV = { bkg_WW, bkg_WZ, bkg_ZZ };
 const StatModel::v_str ttbb_base::bkg_pure_MC = analysis::tools::join(bkg_tW, bkg_VV, bkg_W, bkg_EWK, bkg_ZH);
 const StatModel::v_str ttbb_base::bkg_MC = analysis::tools::join(bkg_pure_MC, bkg_DY, bkg_TT);
 const StatModel::v_str ttbb_base::bkg_all = analysis::tools::join(bkg_MC, bkg_QCD);
+const StatModel::v_str ttbb_base::shape_suffixes = { "", "_CMS_scale_t_13TeVUp", "_CMS_scale_t_13TeVDown",
+                                                     "_CMS_scale_j_13TeVUp", "_CMS_scale_j_13TeVDown"};
 
 ttbb_base::ttbb_base(const StatModelDescriptor& _desc, const std::string& input_file_name) :
     StatModel(_desc, input_file_name), signal_processes({ desc.signal_process }),
     all_mc_processes(ch::JoinStr({ signal_processes, bkg_MC })),
     all_processes(ch::JoinStr({ signal_processes, bkg_all }))
 {
+}
+
+void ttbb_base::AddProcesses(ch::CombineHarvester& cb)
+{
+    for(const auto& channel : desc.channels) {
+        const auto& ch_all_categories = GetChannelCategories(channel);
+        for(size_t n = 0; n < desc.categories.size(); ++n) {
+            const auto& category = desc.categories.at(n);
+            const std::string bin_name = ShapeNameRule::BinName(channel, category);
+            ch::Categories ch_categories;
+            ch_categories.push_back({n, bin_name});
+            cb.AddObservations(wildcard, ana_name, eras, {channel}, ch_categories);
+            cb.AddProcesses(desc.signal_points, ana_name, eras, {channel}, signal_processes,
+                                   ch_categories, true);
+            for(const auto& bkg : bkg_all) {
+                bool all_ok = true;
+                for(const auto& suffix : shape_suffixes) {
+                    if(suffix.size() && bkg == bkg_QCD) continue;
+                    const Yield yield = GetBackgroundYield(bkg + suffix, channel, category);
+                    if(yield.value < 1.1e-9) {
+                        all_ok = false;
+                        break;
+                    }
+                }
+                if(all_ok)
+                    cb.AddProcesses(wildcard, ana_name, eras, {channel}, {bkg}, ch_categories, false);
+            }
+        }
+    }
 }
 
 void ttbb_base::AddSystematics(ch::CombineHarvester& cb)

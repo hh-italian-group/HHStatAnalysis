@@ -18,6 +18,7 @@ public:
                              bkg_WW, bkg_WZ, bkg_ZZ;
     static const v_str bkg_DY, bkg_VV;
     static const v_str bkg_pure_MC, bkg_MC, bkg_all;
+    static const v_str shape_suffixes;
 
     static constexpr double bbb_unc_threshold = 0.1;
     static constexpr double bin_merge_threashold = 0.5;
@@ -25,6 +26,7 @@ public:
     ttbb_base(const StatModelDescriptor& _desc, const std::string& input_file_name);
 
 protected:
+    virtual void AddProcesses(ch::CombineHarvester& combine_harvester);
     virtual void AddSystematics(ch::CombineHarvester& combine_harvester);
 
     virtual const v_str& SignalProcesses() const override { return signal_processes; }

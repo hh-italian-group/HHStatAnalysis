@@ -20,25 +20,14 @@ void ttbb_resonant::CreateDatacards(const std::string& output_path)
 {
     ch::CombineHarvester harvester;
 
-    for(const auto& channel : desc.channels) {
-        const auto& ch_categories = GetChannelCategories(channel);
-        harvester.AddObservations(wildcard, ana_name, eras, {channel}, ch_categories);
-        harvester.AddProcesses(desc.signal_points, ana_name, eras, {channel}, signal_processes, ch_categories, true);
-        harvester.AddProcesses(wildcard, ana_name, eras, {channel}, bkg_MC, ch_categories, false);
-        for(size_t n = 0; n < desc.categories.size(); ++n) {
-            const Yield qcd_yield = GetBackgroundYield(bkg_QCD, channel, desc.categories.at(n));
-            if(qcd_yield.value <= 0) continue;
-            harvester.AddProcesses(wildcard, ana_name, eras, {channel}, {bkg_QCD}, {ch_categories.at(n)}, false);
-        }
-    }
-
+    AddProcesses(harvester);
     AddSystematics(harvester);
     ExtractShapes(harvester);
 
     if(desc.model_signal_process.size())
         RenameProcess(harvester, desc.signal_process, desc.model_signal_process);
 
-    FixNegativeBins(harvester);    
+    FixNegativeBins(harvester);
     harvester.cp().backgrounds().MergeBinErrors(bbb_unc_threshold, bin_merge_threashold);
     harvester.cp().backgrounds().AddBinByBin(bbb_unc_threshold, true, &harvester);
     ch::SetStandardBinNames(harvester);
