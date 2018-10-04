@@ -5,7 +5,7 @@
 INSTALL_MODES=(full plotting)
 DEFAULT_MODE=full
 DEFAULT_N_JOBS=8
-DEFAULT_RELEASE="CMSSW_7_4_7"
+DEFAULT_RELEASE="CMSSW_8_1_0"
 
 function join_by { local d=$1; shift; echo -n "$1"; shift; printf "%s" "${@/#/$d}"; }
 
@@ -45,7 +45,7 @@ if [ -e $RELEASE ] ; then
     exit 1
 fi
 
-export SCRAM_ARCH=slc6_amd64_gcc491
+export SCRAM_ARCH=slc6_amd64_gcc530
 scramv1 project CMSSW $RELEASE
 RESULT=$?
 if [ $RESULT -ne 0 ] ; then
@@ -65,21 +65,31 @@ if [ $MODE = "full" ] ; then
     # Combine tool
     git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
     cd HiggsAnalysis/CombinedLimit
-    git checkout v6.3.0
+    git checkout v7.0.11
     cd ../..
 
     # CombineHarvester package
     mkdir CombineHarvester
     cd CombineHarvester
     git init
-    git remote add origin git@github.com:cms-analysis/CombineHarvester.git
+    git remote add cms-analysis git@github.com:cms-analysis/CombineHarvester.git
+    git remote add cms-hh git@github.com:cms-hh/CombineHarvester.git
+    git remote add hh-italian-group git@github.com:hh-italian-group/CombineHarvester.git
     git config core.sparsecheckout true
     echo -e "CombineTools/\nCombinePdfs/" >> .git/info/sparse-checkout
-    git pull origin master
+    git fetch cms-analysis
+    git fetch cms-hh
+    git fetch hh-italian-group
+    git checkout -b ttbb-it hh-italian-group/ttbb-it
     cd ..
 
     # HHStatAnalysis package
     git clone -o cms-hh git@github.com:cms-hh/HHStatAnalysis.git
+    cd HHStatAnalysis
+    git remote add hh-italian-group git@github.com:hh-italian-group/HHStatAnalysis.git
+    git fetch hh-italian-group
+    git checkout -b ttbb-it hh-italian-group/ttbb-it
+    cd ..
 else
     # HHStatAnalysis package
     mkdir HHStatAnalysis
@@ -93,7 +103,18 @@ else
 fi
 
 git clone -o cms-hh git@github.com:cms-hh/Plotting.git HHStatAnalysis/Plotting
+cd HHStatAnalysis/Plotting
+git remote add hh-italian-group git@github.com:hh-italian-group/Plotting.git
+git fetch hh-italian-group
+git checkout -b ttbb-it hh-italian-group/ttbb-it
+cd ../..
+
 git clone -o cms-hh git@github.com:cms-hh/Resources.git HHStatAnalysis/Resources
+cd HHStatAnalysis/Resources
+git remote add hh-italian-group git@github.com:hh-italian-group/Resources.git
+git fetch hh-italian-group
+git checkout -b ttbb-it hh-italian-group/ttbb-it
+cd ../..
 
 GITHUB_USER=$(git config user.github)
 if ! [ "x$GITHUB_USER" = "x" ] ; then
