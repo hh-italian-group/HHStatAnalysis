@@ -8,7 +8,7 @@ This file is part of https://github.com/cms-hh/HHStatAnalysis. */
 
 namespace hh_analysis {
 namespace stat_models {
-namespace Run2_2016 {
+namespace Run2_2017 {
 
 class ttbb_base : public StatModel {
 public:
@@ -39,6 +39,6 @@ protected:
     const v_str signal_processes, all_mc_processes, all_processes;
 };
 
-} // namespace Run2_2016
+} // namespace Run2_2017
 } // namespace stat_models
 } // namespace hh_analysis

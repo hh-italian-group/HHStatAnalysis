@@ -14,7 +14,7 @@ This file is part of https://github.com/cms-hh/StatAnalysis. */
 
 namespace hh_analysis {
 namespace stat_models {
-namespace Run2_2016 {
+namespace Run2_2017 {
 
 struct CommonUncertainties {
 
@@ -45,7 +45,7 @@ struct CommonUncertainties {
     UNC(topPt, Experiment, shape)
 };
 
-} // namespace Run2_2016
+} // namespace Run2_2017
 } // namespace stat_models
 } // namespace hh_analysis
 

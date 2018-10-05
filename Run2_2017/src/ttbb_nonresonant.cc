@@ -5,17 +5,17 @@ This file is part of https://github.com/cms-hh/HHStatAnalysis. */
 #include "CombineHarvester/CombineTools/interface/Systematics.h"
 #include "CombineHarvester/CombineTools/interface/CardWriter.h"
 #include "CombineHarvester/CombinePdfs/interface/MorphFunctions.h"
-#include "HHStatAnalysis/Run2_2016/interface/ttbb_nonresonant.h"
+#include "HHStatAnalysis/Run2_2017/interface/ttbb_nonresonant.h"
 #include "HHStatAnalysis/Core/interface/exception.h"
 #include "HHStatAnalysis/Core/interface/Tools.h"
 #include "HHStatAnalysis/Core/interface/TextIO.h"
 #include "HHStatAnalysis/Core/interface/RootExt.h"
-#include "HHStatAnalysis/Run2_2016/interface/CommonUncertainties.h"
+#include "HHStatAnalysis/Run2_2017/interface/CommonUncertainties.h"
 #include "HHStatAnalysis/StatModels/interface/PhysicalConstants.h"
 
 namespace hh_analysis {
 namespace stat_models {
-namespace Run2_2016 {
+namespace Run2_2017 {
 
 void ttbb_nonresonant::CreateDatacards(const std::string& output_path)
 {
@@ -74,6 +74,6 @@ void ttbb_nonresonant::AddSystematics(ch::CombineHarvester& cb)
     CU::BR_SM_H_tautau().ApplyGlobal(cb, signal_processes);
 }
 
-} // namespace Run2_2016
+} // namespace 2017
 } // namespace stat_models
 } // namespace hh_analysis

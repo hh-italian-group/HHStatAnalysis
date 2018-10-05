@@ -6,17 +6,17 @@ This file is part of https://github.com/cms-hh/HHStatAnalysis. */
 #include "CombineHarvester/CombineTools/interface/Systematics.h"
 #include "CombineHarvester/CombineTools/interface/CardWriter.h"
 #include "CombineHarvester/CombinePdfs/interface/MorphFunctions.h"
-#include "HHStatAnalysis/Run2_2016/interface/ttbb.h"
+#include "HHStatAnalysis/Run2_2017/interface/ttbb.h"
 #include "HHStatAnalysis/Core/interface/exception.h"
 #include "HHStatAnalysis/Core/interface/Tools.h"
 #include "HHStatAnalysis/Core/interface/TextIO.h"
 #include "HHStatAnalysis/Core/interface/RootExt.h"
-#include "HHStatAnalysis/Run2_2016/interface/CommonUncertainties.h"
+#include "HHStatAnalysis/Run2_2017/interface/CommonUncertainties.h"
 #include "HHStatAnalysis/StatModels/interface/StatTools.h"
 
 namespace hh_analysis {
 namespace stat_models {
-namespace Run2_2016 {
+namespace Run2_2017 {
 
 const StatModel::v_str ttbb_base::ana_name = { "hh_ttbb" };
 const StatModel::v_str ttbb_base::eras = { "13TeV" };
@@ -177,6 +177,6 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     }
 }
 
-} // namespace Run2_2016
+} // namespace Run2_2017
 } // namespace stat_models
 } // namespace hh_analysis
