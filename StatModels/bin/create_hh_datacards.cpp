@@ -36,7 +36,6 @@ public:
         const auto stat_model_ref = SplitValueList(model_desc.stat_model, true, "/");
         if(stat_model_ref.size() != 2)
             throw exception("Bad stat model name '%1%'") % model_desc.stat_model;
-
         const std::string library_name = boost::str(boost::format("libHHStatAnalysis%1%.so") % stat_model_ref.at(0));
         const std::string stat_model_name = stat_model_ref.at(1);
         void* handle = dlopen(library_name.c_str(), RTLD_LAZY);
@@ -50,8 +49,7 @@ public:
         if(!model)
             throw exception("Unable to create an object for stat model '%1%'.") % model_desc.stat_model;
         std::cout << boost::format("Creating datacards for %1% unc model using %2% shapes...")
-                     % model_desc.stat_model % args.shapes() << std::endl;
-        std::cout<<"CIAO"<<std::endl;             
+                     % model_desc.stat_model % args.shapes() << std::endl;            
         model->CreateDatacards(args.output_path());
         std::cout << boost::format("Datacards are successfully created into '%1%'.") % args.output_path() << std::endl;
     }

@@ -141,29 +141,27 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
         }
     }
 
-    // static const std::map<std::string, std::tuple<double, double, double, double, double, double>> qcd_os_ss_sf = {
-    //     { "eTau", std::make_tuple(1.24, 0.05, 1.87, 0.13, /*2.663, 0.167*/) },
-    //     { "muTau", std::make_tuple(1.363, 0.055, 2.108, 0.149, 4.252, 0.403) },
-    //     { "tauTau", std::make_tuple(1.6, 0.1, 1.521, 0.172, 2.729, 0.260) }
-    // };
-    //
-    //
-    // const Uncertainty qcd_norm("qcd_norm", CorrelationRange::Category, UncDistributionType::lnN);
-    // for(const auto& channel : desc.channels) {
-    //     for(const auto& category : desc.categories) {
-    //         const Yield qcd_yield = GetBackgroundYield(bkg_QCD, channel, category);
-    //         const double ss_qcd_yield = qcd_yield.value / std::get<0>(qcd_os_ss_sf.at(channel));
-    //         const double rel_error = 1 / std::sqrt(ss_qcd_yield);
-    //         if(rel_error >= unc_thr)
-    //             qcd_norm.Channel(channel).Category(category).Apply(cb, rel_error, bkg_QCD);
-    //     }
-    // }
+    static const std::map<std::string, std::tuple<double, double, double, double, double, double>> qcd_os_ss_sf = {
+        { "eTau", std::make_tuple(1.24, 0.05, 1.87, 0.13, /*2.663, 0.167*/) },
+        { "muTau", std::make_tuple(1.363, 0.055, 2.108, 0.149, /*4.252, 0.403*/) },
+        { "tauTau", std::make_tuple(1.6, 0.1, 1.521, 0.172, /*2.729, 0.260*/) }
+    };
+
+
+    const Uncertainty qcd_norm("qcd_norm", CorrelationRange::Category, UncDistributionType::lnN);
+    for(const auto& channel : desc.channels) {
+        for(const auto& category : desc.categories) {
+            const Yield qcd_yield = GetBackgroundYield(bkg_QCD, channel, category);
+            const double ss_qcd_yield = qcd_yield.value / std::get<0>(qcd_os_ss_sf.at(channel));
+            const double rel_error = 1 / std::sqrt(ss_qcd_yield);
+            if(rel_error >= unc_thr)
+                qcd_norm.Channel(channel).Category(category).Apply(cb, rel_error, bkg_QCD);
+        }
+    }
 
     const Uncertainty qcd_sf_unc("qcd_sf_unc", CorrelationRange::Channel, UncDistributionType::lnN);
-
     for(const auto& sf_entry : qcd_os_ss_sf) {
         const double rel_stat_unc = std::get<1>(sf_entry.second) / std::get<0>(sf_entry.second);
-
         double rel_ext_unc = 0.3;
 //        if(std::abs(std::get<2>(sf_entry.second) - std::get<0>(sf_entry.second)) >
 //                std::get<1>(sf_entry.second) + std::get<3>(sf_entry.second))
@@ -171,7 +169,7 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
         const double cmb_unc = std::sqrt(std::pow(rel_stat_unc, 2) + std::pow(rel_ext_unc, 2));
         const double cmb_unc_up = rel_ext_unc > 0 ? cmb_unc : rel_stat_unc;
         const double cmb_unc_down = rel_ext_unc > 0 ? -cmb_unc : -rel_stat_unc;
-        // qcd_sf_unc.Channel(sf_entry.first).Apply(cb, std::make_pair(cmb_unc_up, cmb_unc_down), bkg_QCD);
+        qcd_sf_unc.Channel(sf_entry.first).Apply(cb, std::make_pair(cmb_unc_up, cmb_unc_down), bkg_QCD);
         const auto prev_precision = std::cout.precision();
         std::cout << std::setprecision(4) << "ttbb/" << sf_entry.first << ": QCD OS/SS scale factor uncertainties:\n"
                   << "\tstat unc: +/- " << rel_stat_unc * 100 << "%\n"
