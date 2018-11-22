@@ -109,6 +109,7 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
 
     static const size_t DYUncDim = 4;
     TMatrixD dy_unc_cov(DYUncDim, DYUncDim);
+
     dy_unc_cov[0][0] = 2.727e-06;
     dy_unc_cov[1][1] = 0.0002202;
     dy_unc_cov[2][2] = 0.0007727;

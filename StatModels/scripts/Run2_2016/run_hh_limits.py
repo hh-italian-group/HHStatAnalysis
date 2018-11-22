@@ -63,8 +63,8 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
     if run_limits:
         sh_call('combineTool.py -M T2W -i */* -o workspace.root --parallel {}'.format(args.n_parallel),
                 "error while executing text to workspace")
-        combine_cmd = 'combineTool.py -M Asymptotic -d */*/workspace.root --there -n .limit --parallel {}' \
-                      ' --minimizerStrategy=1'.format(args.n_parallel)
+        combine_cmd = 'combineTool.py -M AsymptoticLimits -d */*/workspace.root --there -n .limit --parallel {}' \
+                      ' --cminDefaultMinimizerStrategy=1'.format(args.n_parallel)
         if model_desc.blind:
             combine_cmd += ' --run blind'
         if limit_type == 'SM':
@@ -223,7 +223,7 @@ elif limit_type == 'MSSM':
         ch_dir(work_path)
 
         if collect_limits:
-            asymptoticGrid_cmd = 'combineTool.py -M AsymptoticGrid ../../{} -d ../{} --parallel {} --minimizerStrategy=1'.format(
+            asymptoticGrid_cmd = 'combineTool.py -M AsymptoticGrid ../../{} -d ../{} --parallel {} --cminDefaultMinimizerStrategy=1'.format(
                                  grid_file_name, workspace_file, args.n_parallel)
             if model_desc.blind:
                 asymptoticGrid_cmd += ' -t -1'

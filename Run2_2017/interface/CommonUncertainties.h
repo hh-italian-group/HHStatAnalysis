@@ -19,7 +19,7 @@ namespace Run2_2017 {
 struct CommonUncertainties {
 
     // LHC uncertainties
-    UNC(lumi, LHC, lnN, 0.026) // LUM-17-001
+    UNC(lumi, LHC, lnN, 0.023) // LUM-17-004
     UNC(QCDscale_W, LHC, lnN, 0.008, -0.004) // total unc. https://cms-gen-dev.cern.ch/xsdb/search1/process_name/WJetsToLNu
     UNC(QCDscale_WW, LHC, lnN, 0.04)
     UNC(QCDscale_WZ, LHC, lnN, 0.04)
@@ -28,7 +28,7 @@ struct CommonUncertainties {
     UNC(QCDscale_ttbar, LHC, lnN, +0.048, -0.055) // scale & PDF+alpha_s https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
     UNC(QCDscale_tW, LHC, lnN, 0.054) // scale & PDF https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
     UNC(QCDscale_ZH, LHC, lnN, 0.041, -0.035) // scale & PDF+alpha_s @ mH=125GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt13TeV#ZH_Process
-    UNC(QCDscale_ggHH, LHC, lnN, +0.043, -0.060) // scale @ mH=125GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGHH
+    UNC(QCDscale_ggHH, LHC, lnN, +0.022, -0.050) // scale @ mH=125GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGHH
     UNC(pdf_ggHH, LHC, lnN, 0.059) // Th & PDF & alpha_s @ mH=125GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGHH
     UNC(BR_SM_H_bb, LHC, lnN, 0.012, -0.013) // Th & m_q & alpha_s @ mH=125GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageBR
     UNC(BR_SM_H_tautau, LHC, lnN, 0.016) // Th & m_q & alpha_s @ mH=125GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageBR
