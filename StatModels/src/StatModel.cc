@@ -45,7 +45,6 @@ ch::Categories StatModel::GetChannelCategories(const std::string& channel)
 void StatModel::ExtractShapes(ch::CombineHarvester& cb) const
 {
     const auto signal_rule = SignalShapeNameRule().SetPrefix(desc.signal_point_prefix);
-
     for(const std::string& point_str : desc.signal_points) {
         const double point = Parse<double>(point_str);
         const auto point_rule = signal_rule.SetPoint(point);

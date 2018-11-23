@@ -49,8 +49,8 @@ public:
         if(!model)
             throw exception("Unable to create an object for stat model '%1%'.") % model_desc.stat_model;
         std::cout << boost::format("Creating datacards for %1% unc model using %2% shapes...")
-                     % model_desc.stat_model % args.shapes() << std::endl;            
-        model->CreateDatacards(args.output_path());
+                     % model_desc.stat_model % args.shapes() << std::endl;
+                     model->CreateDatacards(args.output_path());
         std::cout << boost::format("Datacards are successfully created into '%1%'.") % args.output_path() << std::endl;
     }
 
