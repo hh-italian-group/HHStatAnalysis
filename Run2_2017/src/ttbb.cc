@@ -107,24 +107,24 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
 
     CU::topPt().Apply(cb, bkg_TT);
 
-    static const size_t DYUncDim = 4;
+    static const size_t DYUncDim = 6;
     TMatrixD dy_unc_cov(DYUncDim, DYUncDim);
-    dy_unc_cov[0][0] = 2.727e-06;
-    dy_unc_cov[1][1] = 0.0002202;
-    dy_unc_cov[2][2] = 0.0007727;
-    dy_unc_cov[3][3] = 0.0004435;
-    dy_unc_cov[0][1] = dy_unc_cov[1][0] = -6.962e-06;
-    dy_unc_cov[0][2] = dy_unc_cov[2][0] = 6.771e-06;
-    dy_unc_cov[0][3] = dy_unc_cov[3][0] = -8.506e-06;
-    dy_unc_cov[1][2] = dy_unc_cov[2][1] = -0.0001962;
-    dy_unc_cov[1][3] = dy_unc_cov[3][1] = -3.962e-05;
-    dy_unc_cov[2][3] = dy_unc_cov[3][2] = -0.0001762;
+
+    auto dy_file = root_ext::OpenRootFile("HHStatAnalysis/Run2_2017/data/DY_Scale_factor_nbjet_njetBins_other_bkg_fixed_27June.root");
+    auto dy_matrix = root_ext:: ReadObject<TH2D>(*dy_file, "NbjetBins_NjetBins/covariance_matrix");
+
+    for(size_t i = 1; i <= DYUncDim; ++i) {
+      for(size_t j = i; j <= DYUncDim; ++j) {
+        dy_unc_cov[i-1][j-1] = dy_unc_cov[j-1][i-1] = dy_matrix->GetBinContent(i,j);
+      }
+    }
 
     TVectorD dy_sf(DYUncDim);
-    dy_sf[0] = 1.05357;
-    dy_sf[1] = 1.09229;
-    dy_sf[2] = 1.06439;
-    dy_sf[3] = 0.933618;
+    auto sf_histo = root_ext:: ReadObject<TH1D>(*dy_file, "NbjetBins_NjetBins/scale_factors");
+
+    for(size_t i = 1; i <= DYUncDim; ++i) {
+      dy_sf[i-1] = sf_histo->GetBinContent(i);
+    }
 
     auto dy_w_inv = stat_tools::ComputeWhiteningMatrix(dy_unc_cov).Invert();
     std::cout << "ttbb: inverse whitening matrix for DY sf covariance matrix" << std::endl;
@@ -141,11 +141,13 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
         }
     }
 
-    static const std::map<std::string, std::tuple<double, double, double, double>> qcd_os_ss_sf = {
-        { "eTau", std::make_tuple(1.24, 0.05, 1.87, 0.13 /*2.663, 0.167*/) },
-        { "muTau", std::make_tuple(1.363, 0.055, 2.108, 0.149 /*4.252, 0.403*/) },
-        { "tauTau", std::make_tuple(1.6, 0.1, 1.521, 0.172 /*2.729, 0.260*/) }
+    static const std::map<std::string, std::tuple<double, double, double, double, double, double>> qcd_os_ss_sf = {
+        { "eTau", std::make_tuple(1.24, 0.05, 1.87, 0.13, /*2.663, 0.167*/) },
+        { "muTau", std::make_tuple(1.363, 0.055, 2.108, 0.149, /*4.252, 0.403*/) },
+        { "tauTau", std::make_tuple(1.6, 0.1, 1.521, 0.172, /*2.729, 0.260*/) }
     };
+
+
     const Uncertainty qcd_norm("qcd_norm", CorrelationRange::Category, UncDistributionType::lnN);
     for(const auto& channel : desc.channels) {
         for(const auto& category : desc.categories) {
@@ -160,7 +162,7 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     const Uncertainty qcd_sf_unc("qcd_sf_unc", CorrelationRange::Channel, UncDistributionType::lnN);
     for(const auto& sf_entry : qcd_os_ss_sf) {
         const double rel_stat_unc = std::get<1>(sf_entry.second) / std::get<0>(sf_entry.second);
-        double rel_ext_unc = 0.2;
+        double rel_ext_unc = 0.3;
 //        if(std::abs(std::get<2>(sf_entry.second) - std::get<0>(sf_entry.second)) >
 //                std::get<1>(sf_entry.second) + std::get<3>(sf_entry.second))
 //            rel_ext_unc = std::get<2>(sf_entry.second) / std::get<0>(sf_entry.second) - 1;
