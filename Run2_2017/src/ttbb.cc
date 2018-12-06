@@ -110,8 +110,8 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     static const size_t DYUncDim = 6;
     TMatrixD dy_unc_cov(DYUncDim, DYUncDim);
 
-    std::shared_ptr<TFile> file(TFile::Open("HHStatAnalysis/Run2_2017/data/DY_Scale_factor_nbjet_njetBins_other_bkg_fixed_27June.root", "READ"));
-    TH2D* dy_matrix = (TH2D*)file.get()->Get("NbjetBins_NjetBins/covariance_matrix");
+    auto dy_file = root_ext::OpenRootFile("HHStatAnalysis/Run2_2017/data/DY_Scale_factor_nbjet_njetBins_other_bkg_fixed_27June.root");
+    auto dy_matrix = root_ext:: ReadObject<TH2D>(*dy_file, "NbjetBins_NjetBins/covariance_matrix");
 
     for(size_t i = 1; i <= DYUncDim; ++i) {
       for(size_t j = i; j <= DYUncDim; ++j) {
@@ -120,7 +120,7 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     }
 
     TVectorD dy_sf(DYUncDim);
-    TH1D* sf_histo = (TH1D*)file.get()->Get("NbjetBins_NjetBins/scale_factors");
+    auto sf_histo = root_ext:: ReadObject<TH1D>(*dy_file, "NbjetBins_NjetBins/scale_factors");
 
     for(size_t i = 1; i <= DYUncDim; ++i) {
       dy_sf[i-1] = sf_histo->GetBinContent(i);
