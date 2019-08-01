@@ -105,7 +105,7 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     CU::eff_t().Channel("tauTau").Apply(cb, CU::eff_t().up_value * std::sqrt(2.), all_mc_processes);
     CU::scale_t().Apply(cb, all_mc_processes);
 
-    CU::topPt().Apply(cb, bkg_TT);
+    // CU::topPt().Apply(cb, bkg_TT);
 
     static const size_t DYUncDim = 4;
     TMatrixD dy_unc_cov(DYUncDim, DYUncDim);
