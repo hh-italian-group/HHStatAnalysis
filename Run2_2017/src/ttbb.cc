@@ -142,9 +142,9 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     }
 
     static const std::map<std::string, std::tuple<double, double, double, double, double, double>> qcd_os_ss_sf = {
-        { "eTau", std::make_tuple(1.24, 0.05, 1.87, 0.13, /*2.663, 0.167*/) },
-        { "muTau", std::make_tuple(1.363, 0.055, 2.108, 0.149, /*4.252, 0.403*/) },
-        { "tauTau", std::make_tuple(1.6, 0.1, 1.521, 0.172, /*2.729, 0.260*/) }
+        { "eTau", std::make_tuple(1.24, 0.05, 1.87, 0.13, 2.663, 0.167) },
+        { "muTau", std::make_tuple(1.363, 0.055, 2.108, 0.149, 4.252, 0.403) },
+        { "tauTau", std::make_tuple(1.6, 0.1, 1.521, 0.172, 2.729, 0.260) }
     };
 
 
