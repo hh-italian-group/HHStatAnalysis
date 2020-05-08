@@ -48,6 +48,11 @@ protected:
 
     template<typename T>
     const T* ReadObject(const std::string& name) const { return root_ext::ReadObject<T>(*input_file, name); }
+    template<typename T>
+    const T* TryReadObject(const std::string& name) const
+    {
+        return root_ext::TryReadObject<T>(*input_file, name);
+    }
     virtual const Hist* GetSignalHistogram(const std::string& process, double point, const std::string& channel,
                                            const std::string& category, const std::string& region = "") const;
     virtual const Hist* GetBackgroundHistogram(const std::string& process, const std::string& channel,
@@ -56,8 +61,8 @@ protected:
     static Yield GetYield(const Hist& hist);
     Yield GetSignalYield(const std::string& process, double point, const std::string& channel,
                          const std::string& category, const std::string& region = "") const;
-    Yield GetBackgroundYield(const std::string& process, const std::string& channel,
-                             const std::string& category, const std::string& region = "") const;
+    boost::optional<Yield> GetBackgroundYield(const std::string& process, const std::string& channel,
+                                              const std::string& category, const std::string& region = "") const;
 
 protected:
     StatModelDescriptor desc;

@@ -5,32 +5,32 @@ This file is part of https://github.com/cms-hh/HHStatAnalysis. */
 #include "CombineHarvester/CombineTools/interface/Systematics.h"
 #include "CombineHarvester/CombineTools/interface/CardWriter.h"
 #include "CombineHarvester/CombinePdfs/interface/MorphFunctions.h"
-#include "HHStatAnalysis/Run2_2017/interface/ttbb_nonresonant.h"
+#include "HHStatAnalysis/Run2/interface/ttbb_nonresonant.h"
 #include "HHStatAnalysis/Core/interface/exception.h"
 #include "HHStatAnalysis/Core/interface/Tools.h"
 #include "HHStatAnalysis/Core/interface/TextIO.h"
 #include "HHStatAnalysis/Core/interface/RootExt.h"
-#include "HHStatAnalysis/Run2_2017/interface/CommonUncertainties.h"
+#include "HHStatAnalysis/Run2/interface/CommonUncertainties.h"
 #include "HHStatAnalysis/StatModels/interface/PhysicalConstants.h"
 
 namespace hh_analysis {
 namespace stat_models {
-namespace Run2_2017 {
+namespace Run2 {
 
 void ttbb_nonresonant::CreateDatacards(const std::string& output_path)
 {
-    static constexpr double sf = phys_const::XS_HH_13TeV * phys_const::BR_HH_bbtautau;
+    // static constexpr double sf = phys_const::XS_HH_13TeV * phys_const::BR_HH_bbtautau;
 
     ch::CombineHarvester harvester;
 
     AddProcesses(harvester);
     AddSystematics(harvester);
     ExtractShapes(harvester);
-    if(desc.limit_type == LimitType::SM) {
-        harvester.cp().process(signal_processes).ForEachProc([](ch::Process *p) {
-            p->set_rate(p->rate() * sf);
-        });
-    }
+    // if(desc.limit_type == LimitType::SM) {
+    //     harvester.cp().process(signal_processes).ForEachProc([](ch::Process *p) {
+    //         p->set_rate(p->rate() * sf);
+    //     });
+    // }
 
     if(desc.model_signal_process.size())
         RenameProcess(harvester, desc.signal_process, desc.model_signal_process);
@@ -73,6 +73,6 @@ void ttbb_nonresonant::AddSystematics(ch::CombineHarvester& cb)
     CU::BR_SM_H_tautau().ApplyGlobal(cb, signal_processes);
 }
 
-} // namespace 2017
+} // namespace Run2
 } // namespace stat_models
 } // namespace hh_analysis

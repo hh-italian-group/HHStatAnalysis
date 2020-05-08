@@ -5,7 +5,7 @@
 INSTALL_MODES=(full plotting)
 DEFAULT_MODE=full
 DEFAULT_N_JOBS=8
-DEFAULT_RELEASE="CMSSW_8_1_0"
+DEFAULT_RELEASE="CMSSW_10_2_13"
 
 function join_by { local d=$1; shift; echo -n "$1"; shift; printf "%s" "${@/#/$d}"; }
 
@@ -45,7 +45,7 @@ if [ -e $RELEASE ] ; then
     exit 1
 fi
 
-export SCRAM_ARCH=slc6_amd64_gcc530
+export SCRAM_ARCH=slc7_amd64_gcc700
 scramv1 project CMSSW $RELEASE
 RESULT=$?
 if [ $RESULT -ne 0 ] ; then
@@ -65,7 +65,7 @@ if [ $MODE = "full" ] ; then
     # Combine tool
     git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
     cd HiggsAnalysis/CombinedLimit
-    git checkout v7.0.11
+    git checkout v8.1.0
     cd ../..
 
     # CombineHarvester package

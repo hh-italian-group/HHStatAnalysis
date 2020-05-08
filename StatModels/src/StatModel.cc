@@ -76,7 +76,7 @@ const StatModel::Hist* StatModel::GetBackgroundHistogram(const std::string& proc
     if(name_rule.HasVariables())
         throw exception("Insufficient information to make full histogram name for background process '%1%'"
                         " in bin '%2%'.") % process % ShapeNameRule::BinName(channel, category, region);
-    return ReadObject<Hist>(name_rule);
+    return TryReadObject<Hist>(name_rule);
 }
 
 Yield StatModel::GetYield(const Hist& hist)
@@ -93,11 +93,14 @@ Yield StatModel::GetSignalYield(const std::string& process, double point, const 
     return GetYield(*hist);
 }
 
-Yield StatModel::GetBackgroundYield(const std::string& process, const std::string& channel,
-                                    const std::string& category, const std::string& region) const
+boost::optional<Yield> StatModel::GetBackgroundYield(const std::string& process, const std::string& channel,
+                                                     const std::string& category, const std::string& region) const
 {
     const auto hist = GetBackgroundHistogram(process, channel, category, region);
-    return GetYield(*hist);
+    boost::optional<Yield> result;
+    if(hist)
+        result = GetYield(*hist);
+    return result;
 }
 
 } // namespace stat_models

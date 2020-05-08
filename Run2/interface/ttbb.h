@@ -8,15 +8,21 @@ This file is part of https://github.com/cms-hh/HHStatAnalysis. */
 
 namespace hh_analysis {
 namespace stat_models {
-namespace Run2_2017 {
+namespace Run2 {
 
 class ttbb_base : public StatModel {
 public:
     static const v_str ana_name;
     static const v_str eras;
-    static const std::string bkg_TT, bkg_tW, bkg_W, bkg_EWK, bkg_ZH, bkg_QCD, bkg_DY_0b, bkg_DY_1b, bkg_DY_2b,
-                             bkg_WW, bkg_WZ, bkg_ZZ;
-    static const v_str bkg_DY, bkg_VV;
+    static const std::string bkg_TT, bkg_W, bkg_QCD, bkg_VH, bkg_ttH, bkg_H, bkg_EWK, bkg_ST, bkg_VVV,
+                             bkg_ttV, bkg_ttVV, bkg_VV, bkg_DY_M_10_50;
+    static const std::string bkg_DY_0b_0JPt, bkg_DY_0b_10JPt, bkg_DY_0b_30JPt, bkg_DY_0b_50JPt, bkg_DY_0b_100JPt,
+                             bkg_DY_0b_200JPt;
+    static const std::string bkg_DY_1b_0JPt, bkg_DY_1b_10JPt, bkg_DY_1b_30JPt, bkg_DY_1b_50JPt, bkg_DY_1b_100JPt,
+                             bkg_DY_1b_200JPt;
+    static const std::string bkg_DY_2b_0JPt, bkg_DY_2b_10JPt, bkg_DY_2b_30JPt, bkg_DY_2b_50JPt, bkg_DY_2b_100JPt,
+                             bkg_DY_2b_200JPt;
+    static const v_str bkg_DY, bkg_DY_0b, bkg_DY_1b, bkg_DY_2b;
     static const v_str bkg_pure_MC, bkg_MC, bkg_all;
     static const v_str shape_suffixes;
 
@@ -39,6 +45,6 @@ protected:
     const v_str signal_processes, all_mc_processes, all_processes;
 };
 
-} // namespace Run2_2017
+} // namespace Run2
 } // namespace stat_models
 } // namespace hh_analysis
