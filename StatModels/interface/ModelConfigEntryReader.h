@@ -23,9 +23,10 @@ public:
     virtual void EndEntry() override
     {
         CheckReadParamCounts("stat_model", 1, Condition::less_equal);
+        CheckReadParamCounts("years", 1, Condition::less_equal);
         CheckReadParamCounts("channels", 1, Condition::less_equal);
         CheckReadParamCounts("categories", 1, Condition::less_equal);
-        CheckReadParamCounts("signal_process", 1, Condition::less_equal);
+        CheckReadParamCounts("signal_processes", 1, Condition::less_equal);
         CheckReadParamCounts("model_signal_process", 1, Condition::less_equal);
         CheckReadParamCounts("signal_point_prefix", 1, Condition::less_equal);
         CheckReadParamCounts("signal_points", 1, Condition::less_equal);
@@ -56,9 +57,10 @@ public:
                                std::istringstream& /*ss*/) override
     {
         ParseEntry("stat_model", current.stat_model);
+        ParseEntryList("years", current.years);
         ParseEntryList("channels", current.channels);
         ParseEntryList("categories", current.categories);
-        ParseEntry("signal_process", current.signal_process);
+        ParseEntryList("signal_processes", current.signal_processes);
         ParseEntry("model_signal_process", current.model_signal_process);
         ParseEntry("signal_point_prefix", current.signal_point_prefix);
         ParseEntryList("signal_points", current.signal_points);

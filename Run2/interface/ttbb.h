@@ -31,6 +31,8 @@ public:
 
     ttbb_base(const StatModelDescriptor& _desc, const std::string& input_file_name);
 
+    static std::string GetCHChannel(unsigned year, const std::string& channel);
+
 protected:
     virtual void AddProcesses(ch::CombineHarvester& combine_harvester);
     virtual void AddSystematics(ch::CombineHarvester& combine_harvester);
@@ -38,7 +40,7 @@ protected:
     virtual const v_str& SignalProcesses() const override { return signal_processes; }
     virtual const v_str& BackgroundProcesses() const override { return bkg_all; }
 
-    virtual ShapeNameRule SignalShapeNameRule() const override { return "$BIN/$PROCESS_$PREFIX$POINT"; }
+    virtual ShapeNameRule SignalShapeNameRule() const override { return "$BIN/$PROCESS"; }
     virtual ShapeNameRule BackgroundShapeNameRule() const override { return "$BIN/$PROCESS"; }
 
 protected:

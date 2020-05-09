@@ -22,9 +22,11 @@ ENUM_NAMES(LimitType) = {
 struct StatModelDescriptor {
     std::string name;
     std::string stat_model;
+    std::vector<unsigned> years;
     std::vector<std::string> channels;
     std::vector<std::string> categories;
-    std::string signal_process, model_signal_process;
+    std::vector<std::string> signal_processes;
+    std::string model_signal_process;
     std::string signal_point_prefix;
     std::vector<std::string> signal_points;
 

@@ -77,9 +77,13 @@ const StatModel::v_str ttbb_base::bkg_all = analysis::tools::join(bkg_MC, bkg_QC
 //                                                      "_CMS_scale_j_13TeVUp", "_CMS_scale_j_13TeVDown"};
 const StatModel::v_str ttbb_base::shape_suffixes = { "" };
 
+std::string ttbb_base::GetCHChannel(unsigned year, const std::string& channel)
+{
+    return boost::str(boost::format("%1%_%2%") % year % channel);
+}
 
 ttbb_base::ttbb_base(const StatModelDescriptor& _desc, const std::string& input_file_name) :
-    StatModel(_desc, input_file_name), signal_processes({ desc.signal_process }),
+    StatModel(_desc, input_file_name), signal_processes(desc.signal_processes),
     all_mc_processes(ch::JoinStr({ signal_processes, bkg_MC })),
     all_processes(ch::JoinStr({ signal_processes, bkg_all }))
 {
@@ -87,28 +91,31 @@ ttbb_base::ttbb_base(const StatModelDescriptor& _desc, const std::string& input_
 
 void ttbb_base::AddProcesses(ch::CombineHarvester& cb)
 {
-    for(const auto& channel : desc.channels) {
-        const auto& ch_all_categories = GetChannelCategories(channel);
-        for(size_t n = 0; n < desc.categories.size(); ++n) {
-            const auto& category = desc.categories.at(n);
-            const std::string bin_name = ShapeNameRule::BinName(channel, category);
-            ch::Categories ch_categories;
-            ch_categories.push_back({n, bin_name});
-            cb.AddObservations(wildcard, ana_name, eras, {channel}, ch_categories);
-            cb.AddProcesses(desc.signal_points, ana_name, eras, {channel}, signal_processes,
-                                   ch_categories, true);
-            for(const auto& bkg : bkg_all) {
-                bool all_ok = true;
-                for(const auto& suffix : shape_suffixes) {
-                    if(suffix.size() && bkg == bkg_QCD) continue;
-                    const auto yield = GetBackgroundYield(bkg + suffix, channel, category);
-                    if(!yield || yield->value < 1.1e-9) {
-                        all_ok = false;
-                        break;
+    for(unsigned year : desc.years) {
+        for(const auto& channel : desc.channels) {
+            const auto& ch_all_categories = GetChannelCategories(channel);
+            const std::string ch_channel = GetCHChannel(year, channel);
+            for(size_t n = 0; n < desc.categories.size(); ++n) {
+                const auto& category = desc.categories.at(n);
+                const std::string bin_name = ShapeNameRule::BinName(ch_channel, category);
+                ch::Categories ch_categories;
+                ch_categories.push_back({n, bin_name});
+                cb.AddObservations(wildcard, ana_name, eras, {ch_channel}, ch_categories);
+                cb.AddProcesses(wildcard, ana_name, eras, {ch_channel}, signal_processes,
+                                ch_categories, true);
+                for(const auto& bkg : bkg_all) {
+                    bool all_ok = true;
+                    for(const auto& suffix : shape_suffixes) {
+                        if(suffix.size() && bkg == bkg_QCD) continue;
+                        const auto yield = GetBackgroundYield(bkg + suffix, ch_channel, category);
+                        if(!yield || yield->value < 1.1e-9) {
+                            all_ok = false;
+                            break;
+                        }
                     }
+                    if(all_ok)
+                        cb.AddProcesses(wildcard, ana_name, eras, {ch_channel}, {bkg}, ch_categories, false);
                 }
-                if(all_ok)
-                    cb.AddProcesses(wildcard, ana_name, eras, {channel}, {bkg}, ch_categories, false);
             }
         }
     }
@@ -137,10 +144,14 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
     CU::eff_b().Apply(cb, eff_b_unc, bkg_DY_1b, bkg_VV, bkg_EWK, bkg_VH, bkg_ST);
     CU::eff_b().Apply(cb, eff_b_unc * std::sqrt(2.), signal_processes, bkg_DY_2b, bkg_TT);
 
-    CU::eff_e().Channel("eTau").Apply(cb, CU::eff_e().up_value, all_mc_processes);
-    CU::eff_m().Channel("muTau").Apply(cb, CU::eff_m().up_value, all_mc_processes);
-    CU::eff_t().Channels({"eTau", "muTau"}).Apply(cb, CU::eff_t().up_value, all_mc_processes);
-    CU::eff_t().Channel("tauTau").Apply(cb, CU::eff_t().up_value * std::sqrt(2.), all_mc_processes);
+    for(unsigned year : desc.years) {
+        CU::eff_e().Channel(GetCHChannel(year, "eTau")).Apply(cb, CU::eff_e().up_value, all_mc_processes);
+        CU::eff_m().Channel(GetCHChannel(year, "muTau")).Apply(cb, CU::eff_m().up_value, all_mc_processes);
+        CU::eff_t().Channels({GetCHChannel(year, "eTau"), GetCHChannel(year, "muTau")})
+                   .Apply(cb, CU::eff_t().up_value, all_mc_processes);
+        CU::eff_t().Channel(GetCHChannel(year, "tauTau"))
+                   .Apply(cb, CU::eff_t().up_value * std::sqrt(2.), all_mc_processes);
+    }
     // CU::scale_t().Apply(cb, all_mc_processes);
 
     // CU::topPt().Apply(cb, bkg_TT);
@@ -189,35 +200,41 @@ void ttbb_base::AddSystematics(ch::CombineHarvester& cb)
 
 
     const Uncertainty qcd_norm("qcd_norm", CorrelationRange::Category, UncDistributionType::lnN);
-    for(const auto& channel : desc.channels) {
-        for(const auto& category : desc.categories) {
-            const auto qcd_yield = GetBackgroundYield(bkg_QCD, channel, category);
-            if(!qcd_yield)
-                throw exception("QCD not found");
-            const double ss_qcd_yield = qcd_yield->value / std::get<0>(qcd_os_ss_sf.at(channel));
-            const double rel_error = 1 / std::sqrt(ss_qcd_yield);
-            if(rel_error >= unc_thr)
-                qcd_norm.Channel(channel).Category(category).Apply(cb, rel_error, bkg_QCD);
+    for(unsigned year : desc.years) {
+        for(const auto& channel : desc.channels) {
+            const std::string ch_channel = GetCHChannel(year, channel);
+            for(const auto& category : desc.categories) {
+                const auto qcd_yield = GetBackgroundYield(bkg_QCD, ch_channel, category);
+                if(qcd_yield) {
+                    const double ss_qcd_yield = qcd_yield->value / std::get<0>(qcd_os_ss_sf.at(channel));
+                    const double rel_error = 1 / std::sqrt(ss_qcd_yield);
+                    if(rel_error >= unc_thr)
+                        qcd_norm.Channel(ch_channel).Category(category).Apply(cb, rel_error, bkg_QCD);
+                }
+            }
         }
     }
 
     const Uncertainty qcd_sf_unc("qcd_sf_unc", CorrelationRange::Channel, UncDistributionType::lnN);
-    for(const auto& sf_entry : qcd_os_ss_sf) {
-        const double rel_stat_unc = std::get<1>(sf_entry.second) / std::get<0>(sf_entry.second);
-        double rel_ext_unc = 0.3;
-//        if(std::abs(std::get<2>(sf_entry.second) - std::get<0>(sf_entry.second)) >
-//                std::get<1>(sf_entry.second) + std::get<3>(sf_entry.second))
-//            rel_ext_unc = std::get<2>(sf_entry.second) / std::get<0>(sf_entry.second) - 1;
-        const double cmb_unc = std::sqrt(std::pow(rel_stat_unc, 2) + std::pow(rel_ext_unc, 2));
-        const double cmb_unc_up = rel_ext_unc > 0 ? cmb_unc : rel_stat_unc;
-        const double cmb_unc_down = rel_ext_unc > 0 ? -cmb_unc : -rel_stat_unc;
-        qcd_sf_unc.Channel(sf_entry.first).Apply(cb, std::make_pair(cmb_unc_up, cmb_unc_down), bkg_QCD);
-        const auto prev_precision = std::cout.precision();
-        std::cout << std::setprecision(4) << "ttbb/" << sf_entry.first << ": QCD OS/SS scale factor uncertainties:\n"
-                  << "\tstat unc: +/- " << rel_stat_unc * 100 << "%\n"
-                  << "\textrapolation unc: " << rel_ext_unc * 100 << "%\n"
-                  << "\ttotal unc: +" << cmb_unc_up * 100 << "% / " << cmb_unc_down * 100 << "%."
-                  << std::setprecision(prev_precision) << std::endl;
+    for(unsigned year : desc.years) {
+        for(const auto& sf_entry : qcd_os_ss_sf) {
+            const double rel_stat_unc = std::get<1>(sf_entry.second) / std::get<0>(sf_entry.second);
+            double rel_ext_unc = 0.3;
+    //        if(std::abs(std::get<2>(sf_entry.second) - std::get<0>(sf_entry.second)) >
+    //                std::get<1>(sf_entry.second) + std::get<3>(sf_entry.second))
+    //            rel_ext_unc = std::get<2>(sf_entry.second) / std::get<0>(sf_entry.second) - 1;
+            const double cmb_unc = std::sqrt(std::pow(rel_stat_unc, 2) + std::pow(rel_ext_unc, 2));
+            const double cmb_unc_up = rel_ext_unc > 0 ? cmb_unc : rel_stat_unc;
+            const double cmb_unc_down = rel_ext_unc > 0 ? -cmb_unc : -rel_stat_unc;
+            const std::string ch_channel = GetCHChannel(year, sf_entry.first);
+            qcd_sf_unc.Channel(ch_channel).Apply(cb, std::make_pair(cmb_unc_up, cmb_unc_down), bkg_QCD);
+            const auto prev_precision = std::cout.precision();
+            std::cout << std::setprecision(4) << "ttbb/" << sf_entry.first << ": QCD OS/SS scale factor uncertainties:\n"
+                      << "\tstat unc: +/- " << rel_stat_unc * 100 << "%\n"
+                      << "\textrapolation unc: " << rel_ext_unc * 100 << "%\n"
+                      << "\ttotal unc: +" << cmb_unc_up * 100 << "% / " << cmb_unc_down * 100 << "%."
+                      << std::setprecision(prev_precision) << std::endl;
+        }
     }
 }
 

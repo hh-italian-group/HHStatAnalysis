@@ -24,8 +24,8 @@ void ttbb_resonant::CreateDatacards(const std::string& output_path)
     AddSystematics(harvester);
     ExtractShapes(harvester);
 
-    if(desc.model_signal_process.size())
-        RenameProcess(harvester, desc.signal_process, desc.model_signal_process);
+    if(!desc.model_signal_process.empty())
+        RenameProcess(harvester, desc.signal_processes.at(0), desc.model_signal_process);
 
     FixNegativeBins(harvester);
     harvester.cp().backgrounds().MergeBinErrors(bbb_unc_threshold, bin_merge_threashold);

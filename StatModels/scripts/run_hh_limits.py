@@ -60,11 +60,15 @@ if run_limits:
 limit_type = str(model_desc.limit_type)
 if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
     ch_dir(args.output_path)
+    if len(model_desc.signal_points) > 0:
+        dir_pattern = '*/*'
+    else:
+        dir_pattern = '*'
     if run_limits:
-        sh_call('combineTool.py -M T2W -i */* -o workspace.root --parallel {}'.format(args.n_parallel),
+        sh_call('combineTool.py -M T2W -i {} -o workspace.root --parallel {}'.format(dir_pattern, args.n_parallel),
                 "error while executing text to workspace")
-        combine_cmd = 'combineTool.py -M AsymptoticLimits -d */*/workspace.root --there -n .limit --parallel {}' \
-                      ' --cminDefaultMinimizerStrategy=1'.format(args.n_parallel)
+        combine_cmd = 'combineTool.py -M AsymptoticLimits -d {}/workspace.root --there -n .limit --parallel {}' \
+                      ' --cminDefaultMinimizerStrategy=1 --setParameters r=1'.format(dir_pattern, args.n_parallel)
         if model_desc.blind:
             combine_cmd += ' --run blind'
         if limit_type == 'SM':
@@ -74,7 +78,7 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
         sh_call(combine_cmd, "error while executing combine")
 
     if collect_limits:
-        sh_call('combineTool.py -M CollectLimits */*/*.limit.* --use-dirs -o {}'.format(limit_json_file),
+        sh_call('combineTool.py -M CollectLimits {}/*.limit.* --use-dirs -o {}'.format(dir_pattern, limit_json_file),
                 "error while collecting limits")
 
     if args.pulls:

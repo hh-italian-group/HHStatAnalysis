@@ -68,7 +68,9 @@ Object* TryReadObject(TFile& file, const std::string& name)
 {
     try {
         return ReadObject<Object>(file, name);
-    } catch(analysis::exception&) {}
+    } catch(analysis::exception& e){
+        std::cerr << "Warning: " << e.message() << std::endl;
+    }
     return nullptr;
 }
 

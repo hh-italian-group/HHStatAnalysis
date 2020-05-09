@@ -32,8 +32,8 @@ void ttbb_nonresonant::CreateDatacards(const std::string& output_path)
     //     });
     // }
 
-    if(desc.model_signal_process.size())
-        RenameProcess(harvester, desc.signal_process, desc.model_signal_process);
+    if(!desc.model_signal_process.empty())
+        RenameProcess(harvester, desc.signal_processes.at(0), desc.model_signal_process);
 
     FixNegativeBins(harvester);
     harvester.cp().backgrounds().MergeBinErrors(bbb_unc_threshold, bin_merge_threashold);
@@ -43,11 +43,10 @@ void ttbb_nonresonant::CreateDatacards(const std::string& output_path)
     harvester.SetGroup("QCD_bbb", { ".*_QCD_bin_[0-9]+" });
     harvester.SetGroup("DY_bbb", { ".*_DY_[0-9]b_bin_[0-9]+" });
 
-    std::string output_pattern = "/$TAG/$MASS/$BIN.txt";
+    std::string output_pattern = "/$TAG/$BIN.txt";
 
     ch::CardWriter writer(output_path + output_pattern, output_path + "/$TAG/hh_ttbb_input.root");
-    if(desc.morph)
-        writer.SetWildcardMasses({});
+    writer.SetWildcardMasses({});
     if(desc.combine_channels)
         writer.WriteCards("cmb", harvester);
     if(desc.per_channel_limits) {
