@@ -6,8 +6,8 @@ This file is part of https://github.com/cms-hh/StatAnalysis. */
 #include "HHStatAnalysis/StatModels/interface/Uncertainty.h"
 
 #define UNC(name, cor_range, distr_type, ...) \
-    static const GlobalUncertainty& name() { \
-        static const GlobalUncertainty u(#name, CorrelationRange::cor_range, \
+    static const Uncertainty& name() { \
+        static const Uncertainty u(#name, CorrelationRange::cor_range, \
                                          UncDistributionType::distr_type, ##__VA_ARGS__); \
         return u; \
     }
@@ -19,7 +19,17 @@ namespace Run2 {
 struct CommonUncertainties {
 
     // LHC uncertainties
-    UNC(lumi, LHC, lnN, 0.023) // LUM-17-004
+
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
+    static const Uncertainty& lumi() {
+        // using UpDown = Uncertainty::UpDown;
+        static const Uncertainty::UpDownMap m = {
+            { 2016, 2.5 }, { 2017, 2.3 }, { 2018, 2.5 }
+        };
+        static const Uncertainty u("lumi", CorrelationRange::LHC, UncDistributionType::lnN, m);
+        return u;
+    }
+
     UNC(QCDscale_W, LHC, lnN, 0.008, -0.004) // total unc. https://cms-gen-dev.cern.ch/xsdb/search1/process_name/WJetsToLNu
     UNC(QCDscale_WW, LHC, lnN, 0.04)
     UNC(QCDscale_WZ, LHC, lnN, 0.04)

@@ -67,12 +67,13 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
     if run_limits:
         sh_call('combineTool.py -M T2W -i {} -o workspace.root --parallel {}'.format(dir_pattern, args.n_parallel),
                 "error while executing text to workspace")
+        # --cminDefaultMinimizerStrategy=1
         combine_cmd = 'combineTool.py -M AsymptoticLimits -d {}/workspace.root --there -n .limit --parallel {}' \
-                      ' --cminDefaultMinimizerStrategy=1 --setParameters r=1'.format(dir_pattern, args.n_parallel)
+                      ' --setParameters r=1'.format(dir_pattern, args.n_parallel)
         if model_desc.blind:
             combine_cmd += ' --run blind'
         if limit_type == 'SM':
-            combine_cmd += ' --rMax 100'
+            combine_cmd += ' --rMax 10000'
         else:
             combine_cmd += ' --rMax 1'
         sh_call(combine_cmd, "error while executing combine")
@@ -180,15 +181,15 @@ if limit_type in Set(['model_independent', 'SM', 'NonResonant_BSM']):
     if not model_desc.blind:
         limits_to_show += ",obs"
 
-    for input_file in glob.glob(limit_json_pattern):
-        output_name = os.path.splitext(input_file)[0]
-        y_title = None
-        if limit_type == 'SM':
-            y_title = "95% CL limit on #sigma / #sigma(SM)"
-        else:
-            y_title = "95% CL limit on #sigma x BR (pb)"
-        sh_call('plotLimits.py {} --output {} --auto-style --y-title \'{}\' --logy --show {}'.format(input_file,
-                output_name, y_title, limits_to_show), "error while plotting limits")
+    # for input_file in glob.glob(limit_json_pattern):
+    #     output_name = os.path.splitext(input_file)[0]
+    #     y_title = None
+    #     if limit_type == 'SM':
+    #         y_title = "95% CL limit on #sigma / #sigma(SM)"
+    #     else:
+    #         y_title = "95% CL limit on #sigma x BR (pb)"
+    #     sh_call('plotLimits.py {} --output {} --auto-style --y-title \'{}\' --logy --show {}'.format(input_file,
+    #             output_name, y_title, limits_to_show), "error while plotting limits")
 
 elif limit_type == 'MSSM':
     th_model_file_full_path = os.path.abspath(model_desc.th_model_file)

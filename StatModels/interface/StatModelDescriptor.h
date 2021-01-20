@@ -30,15 +30,16 @@ struct StatModelDescriptor {
     std::string signal_point_prefix;
     std::vector<std::string> signal_points;
 
-    LimitType limit_type;
+    LimitType limit_type{LimitType::ModelIndependent};
     std::string th_model_file;
-    bool blind, morph, combine_channels, per_channel_limits, per_category_limits;
+    bool blind{true}, morph{false}, combine_channels{true}, per_channel_limits{false}, per_category_limits{false},
+         per_year_limits{false};
     RangeWithStep<double> grid_x, grid_y;
 
     std::string label_status, label_scenario, label_lumi, title_x, title_y;
     Range<double> draw_range_x, draw_range_y;
-    bool draw_mh_exclusion, draw_mH_isolines;
-    double iso_label_draw_margin;
+    bool draw_mh_exclusion{false}, draw_mH_isolines{false};
+    double iso_label_draw_margin{0.8};
 
     std::map<std::string, std::string> custom_params;
 
@@ -53,11 +54,6 @@ struct StatModelDescriptor {
             throw exception("Unable to parse a value ('%1%') of the custom parameter '%2%'. ") % str_value % key;
         return value;
     }
-
-    StatModelDescriptor() :
-        limit_type(LimitType::ModelIndependent), blind(true), morph(false), combine_channels(true),
-        per_channel_limits(false), per_category_limits(false), draw_mh_exclusion(false), draw_mH_isolines(false),
-        iso_label_draw_margin(0.8) {}
 };
 
 using ModelDescriptorCollection = std::unordered_map<std::string, StatModelDescriptor>;
